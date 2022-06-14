@@ -1,7 +1,9 @@
-DeepMouseTrap
-netrep
-misc
-train_simclr/lighning_logs
-train_simclr/rep_data
-train_simclr/simclr_imagenet
+DeepMouseTrap/
+netrep/
+misc/
+train_simclr/wandb/
+train_simclr/lighning_logs/
+train_simclr/rep_data/
+train_simclr/simclr_imagenet/
+train_simclr/simclr_imagenet_test/
 *.log
