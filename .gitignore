@@ -1,0 +1,7 @@
+DeepMouseTrap
+netrep
+misc
+train_simclr/lighning_logs
+train_simclr/rep_data
+train_simclr/simclr_imagenet
+*.log
