@@ -11,7 +11,7 @@ from train_simclr.simclr_alexnet import SimCLRModel
 SENSORIUM_DATASETS = ['21067-10-18', '22846-10-16', '23343-5-17', '23656-14-22', '23964-4-22', '26872-17-20']
 VIS_LAYERS = ["VISp", "VISl", "VISal", "VISam", "VISpm", "VISrl"]
 LAYER_MAPPING = {'conv1':2,'conv2':5,'conv3':8,'conv4':10,'conv5':12}
-DOMAINS = ["Cremi", "Quickdraw","Sketch","Infograph","Clipart","Painting","Real", "ImageNet"]
+DOMAINS = ["Cremi","Quickdraw","Sketch","Infograph","Clipart","Painting","Real", "ImageNet"]
 AIVC_IMAGES_PATH = 'datasets/stimulus_set.npy'
 SENSORIUM_DATASET_PATH = "datasets/sensorium.hdf5"
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
@@ -42,6 +42,19 @@ def get_model_responses(model:str, activation_file:str, dataset:str):
         model_activations = {key:np.array(activation) for key,activation in model_activations.items()}
     return  model_activations
 
+def extract_neural_response_calcium(layer, hdf_path, mode, ims=np.arange(118)):
+    with h5py.File(hdf_path,'r') as neural_responses:
+        layer_responses = neural_responses[layer]
+        if mode=='average':
+            averaged_responses = layer_responses['average']
+            return {specimen:np.array(response)[ims] for specimen,response in averaged_responses.items()}
+        else:
+            even_responses = layer_responses['even']
+            odd_responses = layer_responses['odd']
+            even_responses_dict = {specimen:np.array(response)[ims] for specimen,response in even_responses.items()}
+            odd_responses_dict = {specimen:np.array(response)[ims] for specimen,response in odd_responses.items()}
+            return even_responses_dict,odd_responses_dict
+        
 def generate_model_activations(model, stimulus):
     """Compute model activations in response to a set of stimulus images.
     
@@ -69,7 +82,7 @@ def generate_model_activations(model, stimulus):
         model_activations[layer] = activations
     return model_activations
 def RunLengthWarning():
-    warnings.warn("This script may take a while! We recommend you run it in the background using `tmux` or `nohup`.",ResourceWarning)
+    print("WARNING: This script may take a while! We recommend you run it in the background using `tmux` or `nohup`.")
 class NaturalScenes(torch.utils.data.Dataset):
     def __init__(self,file_path = f'datasets/stimulus_set.npy'):
         self.ims = np.load(file_path)
