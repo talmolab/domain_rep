@@ -8,3 +8,7 @@ train_simclr/rep_data/
 train_simclr/simclr_imagenet/
 train_simclr/simclr_imagenet_test/
 *.log
+*.hdf5
+*.parquet
+*.pdf
+*.npy
