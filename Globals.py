@@ -35,6 +35,15 @@ def load_model(checkpoint_path, backbone_only = True):
     if backbone_only:
         model = model.backbone[0]
     return model
+def split_half(array_dict):
+    
+    #train1,train2,test1,test2 = train_test_split(np.transpose(train,(2,0,1)), np.transpose(test,(2,0,1)),test_size=0.5) #split by trials
+    
+    array_dict1 = {key:np.transpose(value,(2,0,1))[np.arange(0,50,2)] for key,value in array_dict.items()}
+    array_dict1 = {key:np.mean(np.transpose(value,(1,2,0)),axis=-1) for key,value in array_dict1.items()}
+    array_dict2 = {key:np.transpose(value,(2,0,1))[np.arange(1,50,2)] for key,value in array_dict.items()}
+    array_dict2 = {key:np.mean(np.transpose(value,(1,2,0)),axis=-1) for key,value in array_dict2.items()}
+    return array_dict1,array_dict2
 
 def get_model_responses(model:str, activation_file:str, dataset:str):
     with h5py.File(activation_file,'r') as activations:
@@ -42,19 +51,33 @@ def get_model_responses(model:str, activation_file:str, dataset:str):
         model_activations = {key:np.array(activation) for key,activation in model_activations.items()}
     return  model_activations
 
-def extract_neural_response_calcium(layer, hdf_path, mode, ims=np.arange(118)):
-    with h5py.File(hdf_path,'r') as neural_responses:
-        layer_responses = neural_responses[layer]
-        if mode=='average':
-            averaged_responses = layer_responses['average']
-            return {specimen:np.array(response)[ims] for specimen,response in averaged_responses.items()}
-        else:
-            even_responses = layer_responses['even']
-            odd_responses = layer_responses['odd']
-            even_responses_dict = {specimen:np.array(response)[ims] for specimen,response in even_responses.items()}
-            odd_responses_dict = {specimen:np.array(response)[ims] for specimen,response in odd_responses.items()}
-            return even_responses_dict,odd_responses_dict
-        
+def extract_neural_response(layer, mode=None, calcium_path=None,neuropixels_path = None, ims=np.arange(118)):
+    if neuropixels_path != None:
+        with h5py.File(neuropixels_path,'r') as neural_responses:
+            VIS_responses = neural_responses[layer]
+            per_specimen_response = {}
+            for specimen in VIS_responses.keys():
+                specimen_population = np.transpose(np.array(VIS_responses[specimen]),(1,0,2))#change to shape (num_ims,num_neurons,num_trials)
+                per_specimen_response[specimen] = specimen_population[ims]
+            return split_half(per_specimen_response)
+    elif calcium_path != None:
+        with h5py.File(hdf_path,'r') as neural_responses:
+            layer_responses = neural_responses[layer]
+            if mode=='average':
+                averaged_responses = layer_responses['average']
+                return {specimen:np.array(response)[ims] for specimen,response in averaged_responses.items()}
+            elif mode=='even-odd':
+                even_responses = layer_responses['even']
+                odd_responses = layer_responses['odd']
+                even_responses_dict = {specimen:np.array(response)[ims] for specimen,response in even_responses.items()}
+                odd_responses_dict = {specimen:np.array(response)[ims] for specimen,response in odd_responses.items()}
+                return even_responses_dict,odd_responses_dict
+            else:
+                raise ValueError("Mode must be one of `average` or `even-odd`")
+    else:
+        raise ValueError("Must provide either path to calcium neural data or ephys neural data")
+    
+    
 def generate_model_activations(model, stimulus):
     """Compute model activations in response to a set of stimulus images.
     
