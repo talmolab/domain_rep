@@ -16,20 +16,9 @@ from sklearn.cross_decomposition import PLSRegression
 def spearman_brown(pearson_r):
     return (2*pearson_r)/(1+pearson_r)
 
-def split_half(train,test):
-    train1,train2,test1,test2 = train_test_split(train.T, test.T,test_size=0.5)
-    
-    train1 = train1.T
-    # print(train1.shape)
-    train2 = train2.T
-    
-    test1 = test1.T
-    test2 = test2.T
-    
-    return (train1,train2), (test1,test2)
+
 
 def inter_animal_consistency(model_activations_train, model_activations_test, specimen_response_train,specimen_response_test):
-    # specimen_response_train_halves,specimen_response_test_halves = split_half(specimen_response_train,specimen_response_test)
     specimen_response_train1,specimen_response_train2 = specimen_response_train
     specimen_response_test1,specimen_response_test2 = specimen_response_test
     pls1 = PLSRegression(n_components=25)
@@ -65,6 +54,10 @@ def layer_predictivity(layer_activations,neural_activations):
     return np.median(list(inter_animal_consistencies.values()))
 
 def model_predictivity(model_activations, neural_activations):
+    '''
+    model_activations: dictionary of conv_layer:activation
+    neural_activations: a pair of dictionaries (neural_activations1, neural_activations2 after splitting the specimen in half by trial)
+    '''
     # model_activations = Globals.extract_model_response(model, train_stim)
     # model_activations_test = extract_model_response(model, test_stim)
     layer_wise_predictivity = {layer:None for layer in model_activations.keys()}
@@ -89,7 +82,8 @@ if __name__=='__main__':
     parser.add_argument('-m','--models',nargs='+',action='store',default=Globals.DOMAINS)
     parser.add_argument('-v','--vis_layers',nargs='+',action='store',default=Globals.VIS_LAYERS)
     parser.add_argument('-a','--activation_path',action='store',required=True)
-    parser.add_argument('-c','--calcium_path',action='store')
+    parser.add_argument('-c','--calcium_path',action='store', default=None)
+    parser.add_argument('-np', '--neuropixels_path',action='store',default = None)
     parser.add_argument('-n','--n_iters',action='store',default=100,type=int)
     parser.add_argument('-l','--log_path',action='store',default='neural_preds.log')
     parser.add_argument('-o','--output_path',action='store',default='neural_preds.parquet')
@@ -102,7 +96,12 @@ if __name__=='__main__':
             logger.info(f'Running {model} experiment for {args.n_iters} iterations') 
             model_activations = Globals.get_model_responses(model,args.activation_path,"AIVC")
             for vis_layer in args.vis_layers:
-                neural_activations = Globals.extract_neural_response_calcium(vis_layer,args.calcium_path, "even_odd")
+                if args.calcium_path != None:
+                    neural_activations = Globals.extract_neural_response(vis_layer,calcium_path = args.calcium_path, mode="even_odd")
+                elif args.neuropixels_path!=None: 
+                    neural_activations = Globals.extract_neural_response(vis_layer,neuropixels_path = args.neuropixels_path,mode="even_odd")
+                else: 
+                    raise ValueWarning("must provide either path to calcium data or neuropixels data")
                 for i in tqdm(range(args.n_iters),desc=f'{vis_layer}'):
                     model_predictivity = model_predictivity(model_activations,neural_activations)
                     for layer,pred in model_predictivity.items():
