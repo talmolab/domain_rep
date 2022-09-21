@@ -10,13 +10,13 @@ import sys
 sys.path.append('../')
 import argparse
 import Globals
+import torch
+import torchmetrics
 from sklearn.model_selection import train_test_split
 from sklearn.cross_decomposition import PLSRegression
 
 def spearman_brown(pearson_r):
     return (2*pearson_r)/(1+pearson_r)
-
-
 
 def inter_animal_consistency(model_activations_train, model_activations_test, specimen_response_train,specimen_response_test):
     specimen_response_train1,specimen_response_train2 = specimen_response_train
@@ -81,27 +81,52 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-m','--models',nargs='+',action='store',default=Globals.DOMAINS)
     parser.add_argument('-v','--vis_layers',nargs='+',action='store',default=Globals.VIS_LAYERS)
+    parser.add_argument('-d','--datasets',nargs='+',action='store',default=Globals.SENSORIUM_DATASETS)
     parser.add_argument('-a','--activation_path',action='store',required=True)
     parser.add_argument('-c','--calcium_path',action='store', default=None)
     parser.add_argument('-np', '--neuropixels_path',action='store',default = None)
+    parser.add_argument('-s','--sensorium_path',action='store', default = None)
     parser.add_argument('-n','--n_iters',action='store',default=100,type=int)
     parser.add_argument('-l','--log_path',action='store',default='neural_preds.log')
     parser.add_argument('-o','--output_path',action='store',default='neural_preds.parquet')
     args = parser.parse_args()
     Globals.RunLengthWarning()
     logger = Globals.setup_logger('neural_preds',args.log_path)
-    results = {'Domain':[],"Vis_Layer":[],"Conv_layer":[],"Neural Predictivity":[]}
+    if args.sensorium_path != None:
+        results = {'Domain':[],"Dataset":[],"Conv_layer":[],"Neural Predictivity":[],"Mean Squared Error":[]}
+    else:
+        results = {'Domain':[],"Vis_Layer":[],"Conv_layer":[],"Neural Predictivity":[]}
     for model in tqdm(args.models,desc='Models'):
-        try:
-            logger.info(f'Running {model} experiment for {args.n_iters} iterations') 
+        logger.info(f'Running {model} experiment for {args.n_iters} iterations')
+        if args.sensorium_path != None:
+            neural_activations = Globals.compile_sensorium_neural_responses(args.sensorium_path)
+            for dataset in args.datasets:
+                model_activations = Globals.get_model_responses(model,args.activation_path,dataset)
+                specimen_activations = neural_activations[dataset]
+                for i in tqdm(range(args.n_iters)):
+                    for layer in model_activations.keys():
+                        layer_activations = model_activations[layer]
+                        x_train,x_test,y_train,y_test= train_test_split(layer_activations,specimen_activations,test_size=0.5,train_size=0.5)
+                        pls = PLSRegression(n_components=25)
+                        pls.fit(x_train,y_train)
+                        train_result = pls.predict(x_train)
+                        train_mse = torchmetrics.functional.mean_squared_error(torch.Tensor(train_result),torch.Tensor(y_train))
+                        train_r,train_p = sp.stats.pearsonr(train_result.flatten(),y_train.flatten())
+                        val_result = pls.predict(x_test)
+                        val_mse = torchmetrics.functional.mean_squared_error(torch.Tensor(val_result),torch.Tensor(y_test))
+                        val_r,val_p = sp.stats.pearsonr(val_result.flatten(),y_test.flatten())
+                        results['Domain'].append(model)
+                        results['Conv_layer'].append(layer)
+                        results['Dataset'].append(specimen)
+                        results['Mean Squared Error'].append(val_mse)
+                        results['Neural Predictivity'].append(val_r)
+        elif args.calcium_path != None or args.neuropixels_path != None:
             model_activations = Globals.get_model_responses(model,args.activation_path,"AIVC")
             for vis_layer in args.vis_layers:
                 if args.calcium_path != None:
                     neural_activations = Globals.extract_neural_response(vis_layer,calcium_path = args.calcium_path, mode="even_odd")
                 elif args.neuropixels_path!=None: 
                     neural_activations = Globals.extract_neural_response(vis_layer,neuropixels_path = args.neuropixels_path,mode="even_odd")
-                else: 
-                    raise ValueWarning("must provide either path to calcium data or neuropixels data")
                 for i in tqdm(range(args.n_iters),desc=f'{vis_layer}'):
                     model_predictivity = model_predictivity(model_activations,neural_activations)
                     for layer,pred in model_predictivity.items():
@@ -109,11 +134,8 @@ if __name__=='__main__':
                         results['Vis_Layer'].append(vis_layer)
                         results['Conv_layer'].append(layer)
                         results['Neural Predictivity'].append(pred)
-            logger.info(f'Experiment Complete.')
-        except Exception as e:
-            logger.error(e)
-            continue
+        else: 
+            raise ValueWarning("must provide path to either sensorium, calcium, or neuropixels data")
+        logger.info(f'Experiment Complete.')
     results_df = pd.DataFrame(results)
     results_df.to_parquet(args.output_path)
-                    
-    

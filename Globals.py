@@ -76,7 +76,15 @@ def extract_neural_response(layer, mode=None, calcium_path=None,neuropixels_path
                 raise ValueError("Mode must be one of `average` or `even-odd`")
     else:
         raise ValueError("Must provide either path to calcium neural data or ephys neural data")
-    
+def compile_sensorium_neural_responses(sensorium_neural_activations_path):
+    with h5py.File(sensorium_neural_activations_path,'r') as sensorium_dataset:
+        sensorium_responses = {specimen:{split:np.array(responses) 
+                                         for split,responses in sensorium_dataset['Responses'][specimen].items()
+                                        } 
+                               for specimen in sensorium_dataset['Responses'].keys()
+                              }
+        sensorium_responses = {dataset:np.concatenate([sensorium_responses[dataset][split] for split in sensorium_responses[dataset].keys()]) for dataset in sensorium_responses.keys()}
+    return sensorium_responses
     
 def generate_model_activations(model, stimulus):
     """Compute model activations in response to a set of stimulus images.
