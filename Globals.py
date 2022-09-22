@@ -14,6 +14,36 @@ LAYER_MAPPING = {'conv1':2,'conv2':5,'conv3':8,'conv4':10,'conv5':12}
 DOMAINS = ["Cremi","Quickdraw","Sketch","Infograph","Clipart","Painting","Real", "ImageNet"]
 AIVC_IMAGES_PATH = 'datasets/stimulus_set.npy'
 SENSORIUM_DATASET_PATH = "datasets/sensorium.hdf5"
+DATASET_LINKS = {"Sensorium":"https://drive.google.com/file/d/1M1QQb9bpI1pswMcUwEqfSpuwrqHvmXGo/view?usp=sharing",
+                 "AIVC-images":"https://drive.google.com/file/d/1MGsA5Eb7oZEM2JlaWj2eMEJhEfdpNzhO/view?usp=sharing",
+                 "AIVC-calcium_raw":"https://drive.google.com/file/d/1LtZQa0zLuzZIYyNbJQQm-e6lPid2Fj2s/view?usp=sharing",
+                 "AIVC-calcium_filtered": "https://drive.google.com/file/d/1LPkq__tzdZqYtSbBrAA9BoecqmIFaIcv/view?usp=sharing",
+                 "AIVC-neuropixels_raw":"https://drive.google.com/file/d/1Ly0L6EEznTVdxK4UDrtK3m-OcFGILtsn/view?usp=sharing",
+                 "AIVC-neuropixels_filtered":"https://drive.google.com/file/d/1LVSwbwrqy2Z1Q0N_HdnZvuTgaHbiEIbU/view?usp=sharing",
+                 "all":"https://drive.google.com/drive/folders/1LMjrWxjZCJ2iOWLgr6_SKPMUJIYl8LjL?usp=sharing"
+                }
+CHECKPOINT_LINKS = {'ImageNet':"https://drive.google.com/file/d/1L8HJel7jVS1W8r-Ohbr2_v6XGThHftbz/view?usp=sharing",
+                    'Real':'https://drive.google.com/file/d/1LI4UOwnwKMBpjMK3jUcQJffC7z9-kpEd/view?usp=sharing',
+                    'Painting':'https://drive.google.com/file/d/1LBwskF-eM-iBDZm-h215gFtV5PccbfPL/view?usp=sharing',
+                    'Clipart': "https://drive.google.com/file/d/1Kz0anzP72ZiJWCVR6Gwv6L6ZktkFvHmF/view?usp=sharing",
+                    'Infograph': "https://drive.google.com/file/d/1LA1Tztq5dVHk972Kk-XQKKbKyBshmkQw/view?usp=sharing",
+                    'Sketch': "https://drive.google.com/file/d/1LLDW6i0y55fFrdE4a1BVIVYrG0twaX6_/view?usp=sharing",
+                    'Quickdraw': "https://drive.google.com/file/d/1LD5DyxOXEyPNaEu63EBrnRAvfqele8DW/view?usp=sharing",
+                    'Cremi': "https://drive.google.com/file/d/1L6tugqshsQ3OXNnDgUlv612CVpkLJ6X6/view?usp=sharing",
+                    'all': 'https://drive.google.com/drive/folders/1Krh9Qs74B40SfFLlLrmbmorQHw2dORrq?usp=sharing'
+                   }
+MODEL_ACTIVATION_LINKS = {'AIVC':"https://drive.google.com/file/d/1KopDi6aOeAaetbBr654HzLIhCLXPrIFf/view?usp=sharing",
+                          'Sensorium':"https://drive.google.com/file/d/1Kq80LqGGZe3n1BqlnIw4pv5Oshfcl_90/view?usp=sharing",
+                         }
+ANALYSIS_LINKS = {"Activation_Distances-AIVC":"https://drive.google.com/file/d/1KLggo0-iNvxFtPZyU4R1NHMG5y3bVNWW/view?usp=sharing",
+                  "Activation_Distances-Sensorium":"https://drive.google.com/file/d/1K9gn6JN5etvHu85BDwAgY1o5Cw-pNhKR/view?usp=sharing",
+                  "Activation_Magnitudes-AIVC":"https://drive.google.com/file/d/1KniHoq5CkAtwNVHnAtnbIyzqcxs2RtUj/view?usp=sharing",
+                  "Activation_Magnitudes-Sensorium":"https://drive.google.com/file/d/1KjnVoLY9x1FcTIeWoprTGeXJ-I-XGfZT/view?usp=sharing",
+                  "Naturalness":"https://drive.google.com/file/d/1KhjlDB99FX5NZmAISUKHTLkd8h5Jnzi_/view?usp=sharing",
+                  "Neural_Pred-Ephys":"https://drive.google.com/file/d/1Kf85kl_SP6lFFWmECCxmcAmxkonvz3M-/view?usp=sharing",
+                  "Neural_Pred-Calcium":"https://drive.google.com/file/d/1KdZkpvodnlT3UPFwe1A7AInLStTQkz0r/view?usp=sharing",
+                  "Neural_Pred-Sensorium":"https://drive.google.com/file/d/1KU632yBV9v-vTCnd7kS1MKvja4n4Pu1e/view?usp=sharing"
+                 }
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
 def load_model(checkpoint_path, backbone_only = True):
