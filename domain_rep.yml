@@ -198,14 +198,17 @@ dependencies:
     - argon2-cffi==21.3.0
     - argon2-cffi-bindings==21.2.0
     - astunparse==1.6.3
+    - beautifulsoup4==4.11.1
     - bleach==4.1.0
     - cached-property==1.5.2
     - clang==5.0
     - commonmark==0.9.1
     - defusedxml==0.7.1
     - docker-pycreds==0.4.0
+    - filelock==3.8.0
     - flatbuffers==1.12
     - gast==0.4.0
+    - gdown==4.5.1
     - gitdb==4.0.9
     - gitpython==3.1.27
     - google-pasta==0.2.0
@@ -244,6 +247,7 @@ dependencies:
     - shortuuid==1.0.8
     - six==1.15.0
     - smmap==5.0.0
+    - soupsieve==2.3.2.post1
     - tensorboard==2.6.0
     - tensorboard-data-server==0.6.1
     - tensorflow==2.6.3
