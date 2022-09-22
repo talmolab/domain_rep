@@ -6,7 +6,7 @@ There are n steps to reproducing. At each step, cd into the corresponding direct
 
 1. Install the conda env provided using `conda env create -f neural_pred.yml`. Then activate the environment using `conda activate domain_rep`
 
-2. Download the neural datasets needed for the pipeline using `python download_neural_datasets.py -d [DATASETS] -o [OUTPUT_DIR]` See python download_neural_datasets -h` for more info.
+2. Download the neural datasets needed for the pipeline using `python download_neural_datasets.py -d [DATASETS] -o [OUTPUT_DIR]` See `python download_neural_datasets -h` for more info.
 
 3. Train the simclr model on whatever datasets you want using `python train.py [DATASET_PATH] --options`. Currently all the flags are set to the hyperparameters we used but if you'd like to change them, see `python train_simclr/train.py -h`.
 
