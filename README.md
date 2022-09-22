@@ -10,6 +10,6 @@ There are n steps to reproducing. At each step, cd into the corresponding direct
 
 3. Train the simclr model on whatever datasets you want using `python train.py [DATASET_PATH] --options`. Currently all the flags are set to the hyperparameters we used but if you'd like to change them, see `python train_simclr/train.py -h`.
 
-4. Generate model activations to each dataset using `python generate_model_activations.py -d [dataset] -m [model names] -c [checkpoint paths]. See `python generate_model_activations.py`
+4. Generate model activations to each dataset using `python generate_model_activations.py -d [dataset] -m [model names] -c [checkpoint paths]`. See `python generate_model_activations.py`
 
 5. Once you've generated the model activations, you can use any of the scripts located in `rep_analysis` to reproduce our analysis.
